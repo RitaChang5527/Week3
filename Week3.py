@@ -38,9 +38,11 @@ if data:
                     district = address.split("區")[0].strip() + "區"
                 longitude = item["longitude"]
                 latitude = item["latitude"]
-                images = item["file"].split("http")[1:]  # 只取第一張圖檔的網址
-                image_url = "http" + images[0].split('jpg')[0] + 'jpg'  # 修正圖片網址
-                writer.writerow([name, district, longitude, latitude, image_url])
+                image_url = "https" + item["file"].split("https")[-1].split("?")[0].strip()  # 取得圖片網址，並刪除可能的參數
+
+                # 篩選是否為相片（以.jpg、.png、.jpeg 結尾）
+                if image_url.endswith((".jpg", ".JPG",".png", ".jpeg")):
+                    writer.writerow([name, district, longitude, latitude, image_url])
         print("attraction.csv 檔案已成功輸出。")
 
         #* 2. 輸出 mrt.csv
@@ -56,18 +58,17 @@ if data:
                         mrt_data[station] = []
                     mrt_data[station].append(name)
 
-        #* 寫入 mrt.csv
         with open("mrt.csv", mode="w", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
             header = ["捷運站名稱", "景點名稱"]
             writer.writerow(header)  #* 寫入欄位名稱
             for station, attractions in mrt_data.items():
-                writer.writerow([station, ",".join(attractions)])
+                writer.writerow([station, *attractions])
 
-        print("mrt.csv 檔案已成功輸出")
+        print("mrt.csv 檔案已成功輸出。")
 
     except json.JSONDecodeError as e:
-        print("無法解析 JSON 資料：", e)
+        print("JSON 解析錯誤：", e)
 
 #*task2
 print("==============Task2==============")
