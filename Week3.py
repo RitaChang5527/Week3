@@ -4,7 +4,7 @@ import urllib.request
 import json
 import csv
 
-#* 定義函式從網址取得資料
+# 定義函式從網址取得資料
 def fetch_data(url):
     try:
         with urllib.request.urlopen(url) as response:
@@ -19,18 +19,18 @@ data = fetch_data(url)
 
 if data:
     try:
-        #* 解析 JSON 資料
+        # 解析 JSON 資料
         json_data = json.loads(data)
 
-        #* 1. 輸出 attraction.csv
+        # 輸出 attraction.csv
         with open("attraction.csv", "w", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
-            header = ["Name","District", "Longitude", "Latitude", "Image"]
-            writer.writerow(header)  #* 寫入欄位名稱
+            header = ["景點名稱", "區域", "經度", "緯度", "第⼀張圖檔網址"]
+            writer.writerow(header)  # 寫入欄位名稱
             for item in json_data["result"]["results"]:
                 name = item["stitle"]
                 address = item["address"]
-                #* 從地址中提取區域資訊
+                # 從地址中提取區域資訊
                 district = ""
                 if "市" in address:
                     district = address.split("市")[1].split("區")[0].strip() + "區"
@@ -40,9 +40,12 @@ if data:
                 latitude = item["latitude"]
                 image_url = "https" + item["file"].split("https")[-1].split("?")[0].strip()  # 取得圖片網址，並刪除可能的參數
 
-                # 篩選是否為相片（以.jpg、.png、.jpeg 結尾）
-                if image_url.endswith((".jpg", ".JPG",".png", ".jpeg")):
+                # 檢查檔名是否含有 ".jpg" 或 ".JPG"
+                if ".jpg" in image_url.lower() or ".JPG" in image_url.lower():
                     writer.writerow([name, district, longitude, latitude, image_url])
+                else:
+                    continue
+
         print("attraction.csv 檔案已成功輸出。")
 
         #* 2. 輸出 mrt.csv
@@ -54,9 +57,7 @@ if data:
                 mrt_stations = mrt_stations.split("、")
                 for station in mrt_stations:
                     #* 將景點名稱按照捷運站分群
-                    if station not in mrt_data:
-                        mrt_data[station] = []
-                    mrt_data[station].append(name)
+                    mrt_data.setdefault(station, []).append(name)
 
         with open("mrt.csv", mode="w", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
@@ -70,6 +71,8 @@ if data:
     except json.JSONDecodeError as e:
         print("JSON 解析錯誤：", e)
 
+
+"""
 #*task2
 print("==============Task2==============")
 import urllib.request as req
@@ -117,3 +120,4 @@ with open("movie.txt", mode="w", newline="", encoding="utf-8") as file:
 print("movie.txt 檔案已成功輸出")
 
 
+"""
