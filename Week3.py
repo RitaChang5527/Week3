@@ -23,7 +23,7 @@ if data:
         # 輸出 attraction.csv
         with open("attraction.csv", "w", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
-            header = ["Name", "District", "Longitude", "Latitude", "Image"]
+            header = ["景點名稱", "區域", "經度", "緯度", "第一張圖檔網址"]
             writer.writerow(header)  # 寫入欄位名稱
 
             image_urls = {}  # 儲存每個景點的圖片網址
@@ -80,7 +80,7 @@ if data:
         print("JSON 解析錯誤：", e)
 
 
-"""
+
 #*task2
 print("==============Task2==============")
 import urllib.request as req
@@ -126,6 +126,3 @@ with open("movie.txt", mode="w", newline="", encoding="utf-8") as file:
                 writer.writerow([title_text, push_count, post_time])
 
 print("movie.txt 檔案已成功輸出")
-
-
-"""
