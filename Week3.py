@@ -1,4 +1,3 @@
-#* task1
 print("==============Task1==============")
 import urllib.request
 import json
@@ -16,7 +15,6 @@ def fetch_data(url):
 
 url = "https://padax.github.io/taipei-day-trip-resources/taipei-attractions-assignment.json"
 data = fetch_data(url)
-
 if data:
     try:
         # 解析 JSON 資料
@@ -25,8 +23,10 @@ if data:
         # 輸出 attraction.csv
         with open("attraction.csv", "w", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
-            header = ["景點名稱", "區域", "經度", "緯度", "第⼀張圖檔網址"]
+            header = ["Name", "District", "Longitude", "Latitude", "Image"]
             writer.writerow(header)  # 寫入欄位名稱
+
+            image_urls = {}  # 儲存每個景點的圖片網址
             for item in json_data["result"]["results"]:
                 name = item["stitle"]
                 address = item["address"]
@@ -38,13 +38,21 @@ if data:
                     district = address.split("區")[0].strip() + "區"
                 longitude = item["longitude"]
                 latitude = item["latitude"]
-                image_url = "https" + item["file"].split("https")[-1].split("?")[0].strip()  # 取得圖片網址，並刪除可能的參數
 
-                # 檢查檔名是否含有 ".jpg" 或 ".JPG"
-                if ".jpg" in image_url.lower() or ".JPG" in image_url.lower():
-                    writer.writerow([name, district, longitude, latitude, image_url])
-                else:
-                    continue
+                # 分割圖片網址，以 "https" 為分隔符，並取得每個子網址
+                image_urls_list = item["file"].split("https")[1:]
+                for image_url in image_urls_list:
+                    # 取得每個子網址的後半部分，並判斷是否為相片檔案
+                    if image_url.lower().endswith((".jpg", ".jpeg", ".png")):
+                        # 構建完整的圖片網址，並將圖片網址加入字典
+                        full_image_url = "https" + image_url.split("?")[0].strip()
+                        if name not in image_urls:
+                            image_urls[name] = full_image_url
+                        break  # 只取每個景點的第一張圖片網址
+
+            # 寫入 CSV 檔案
+            for name, image_url in image_urls.items():
+                writer.writerow([name, district, longitude, latitude, image_url])
 
         print("attraction.csv 檔案已成功輸出。")
 
